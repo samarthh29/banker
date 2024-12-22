@@ -28,7 +28,7 @@ public class CustomerService {
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
     }
 
-    public Customer updateCustomer(Long id, Customer updatedCustomer) {
+    public Customer updateCustomer(Long id, @org.jetbrains.annotations.NotNull Customer updatedCustomer) {
         Customer existingCustomer = getCustomerById(id);
         existingCustomer.setName(updatedCustomer.getName());
         existingCustomer.setEmail(updatedCustomer.getEmail());
