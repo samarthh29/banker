@@ -1,9 +1,9 @@
 package tellerapp.accountservice.controller;
 
-import tellerapp.accountservice.entity.Account;
-import tellerapp.accountservice.service.AccountService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tellerapp.accountservice.entity.Account;
+import tellerapp.accountservice.service.AccountService;
 
 import java.util.List;
 
