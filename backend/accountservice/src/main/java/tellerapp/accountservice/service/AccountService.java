@@ -19,10 +19,8 @@ public class AccountService {
     }
 
     public Account createAccount(Account account) {
-        // Generate the account number
         String accountNumber = generateAccountNumber();
         account.setAccountNumber(accountNumber);
-
         return accountRepository.save(account);
     }
 
@@ -30,24 +28,24 @@ public class AccountService {
         return accountRepository.findByCustomerId(customerId);
     }
 
-    public Account getAccountById(Long id) {
-        return accountRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+    public Account getAccountByAccountNumber(String accountNumber) {
+        return accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Account not found with account number: " + accountNumber));
     }
 
-    public Account updateAccount(Long id, Account updatedAccount) {
-        Account existingAccount = getAccountById(id);
+    public Account updateAccountByAccountNumber(String accountNumber, Account updatedAccount) {
+        Account existingAccount = getAccountByAccountNumber(accountNumber);
         existingAccount.setBalance(updatedAccount.getBalance());
         existingAccount.setAccountType(updatedAccount.getAccountType());
         return accountRepository.save(existingAccount);
     }
 
-    public void deleteAccount(Long id) {
-        accountRepository.deleteById(id);
+    public void deleteAccountByAccountNumber(String accountNumber) {
+        Account account = getAccountByAccountNumber(accountNumber);
+        accountRepository.deleteById(account.getId());
     }
 
     private String generateAccountNumber() {
-        // Get the highest account number from the database
         List<String> accountNumbers = accountRepository.findLastAccountNumber();
 
         if (accountNumbers.isEmpty()) {
