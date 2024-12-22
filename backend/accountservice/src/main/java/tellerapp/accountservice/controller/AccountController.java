@@ -1,7 +1,9 @@
+// AccountController.java
 package tellerapp.accountservice.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import tellerapp.accountservice.dto.BalanceUpdateRequest;
 import tellerapp.accountservice.entity.Account;
 import tellerapp.accountservice.service.AccountService;
 
@@ -35,6 +37,13 @@ public class AccountController {
     @PutMapping("/{accountNumber}")
     public ResponseEntity<Account> updateAccount(@PathVariable String accountNumber, @RequestBody Account account) {
         return ResponseEntity.ok(accountService.updateAccountByAccountNumber(accountNumber, account));
+    }
+
+    @PutMapping("/{accountNumber}/balance")
+    public ResponseEntity<Account> updateBalance(
+            @PathVariable String accountNumber,
+            @RequestBody BalanceUpdateRequest request) {
+        return ResponseEntity.ok(accountService.updateBalance(accountNumber, request.getNewBalance()));
     }
 
     @DeleteMapping("/{accountNumber}")

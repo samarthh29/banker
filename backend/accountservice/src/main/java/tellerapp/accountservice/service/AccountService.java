@@ -40,6 +40,12 @@ public class AccountService {
         return accountRepository.save(existingAccount);
     }
 
+    public Account updateBalance(String accountNumber, double newBalance) {
+        Account account = getAccountByAccountNumber(accountNumber);
+        account.setBalance(newBalance);
+        return accountRepository.save(account);
+    }
+
     public void deleteAccountByAccountNumber(String accountNumber) {
         Account account = getAccountByAccountNumber(accountNumber);
         accountRepository.deleteById(account.getId());
