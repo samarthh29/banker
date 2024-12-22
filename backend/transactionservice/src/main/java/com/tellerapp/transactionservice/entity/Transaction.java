@@ -32,7 +32,7 @@ public class Transaction {
     @Column(name = "approved_by")
     private String approvedBy; // Optional: Name or ID of the approver for specific transactions
 
-    // Getters
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -65,7 +65,6 @@ public class Transaction {
         return approvedBy;
     }
 
-    // Setters
     public void setId(Long id) {
         this.id = id;
     }
@@ -98,7 +97,7 @@ public class Transaction {
         this.approvedBy = approvedBy;
     }
 
-    // Lifecycle callbacks
+    // Lifecycle callback
     @PrePersist
     public void prePersist() {
         if (this.transactionDate == null) {

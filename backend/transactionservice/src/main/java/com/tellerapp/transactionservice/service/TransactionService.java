@@ -24,10 +24,16 @@ public class TransactionService {
 
     @Transactional
     public Transaction createTransaction(Transaction transaction) {
-        Account account = accountService.getAccountById(transaction.getAccountId());
+        // Get account using account number instead of account ID
+        Account account = accountService.getAccountByAccountNumber(transaction.getAccountNumber());
 
-        // Set the account number for the transaction from the Account entity
-        transaction.setAccountNumber(account.getAccountNumber());
+        // If account is not found, throw an exception
+        if (account == null) {
+            throw new IllegalArgumentException("Account not found for the given account number.");
+        }
+
+        // Set accountId in the transaction (important for database consistency)
+        transaction.setAccountId(account.getId());
 
         // Handle "Withdrawal"
         if ("WITHDRAWAL".equalsIgnoreCase(transaction.getTransactionType())) {
@@ -42,22 +48,23 @@ public class TransactionService {
             }
 
             // Deduct balance and update account
-            account.setBalance(account.getBalance() - transaction.getAmount());
-            accountService.updateAccount(account.getId(), account);
+            double newBalance = account.getBalance() - transaction.getAmount();
+            accountService.updateBalance(account.getAccountNumber(), newBalance);
         }
 
         // Handle "Deposit"
         else if ("DEPOSIT".equalsIgnoreCase(transaction.getTransactionType())) {
             // Add balance and update account
-            account.setBalance(account.getBalance() + transaction.getAmount());
-            accountService.updateAccount(account.getId(), account);
+            double newBalance = account.getBalance() + transaction.getAmount();
+            accountService.updateBalance(account.getAccountNumber(), newBalance);
         }
 
-        // Set transaction date (if not already set) and save the transaction
+        // Set transaction date (if not already set)
         if (transaction.getTransactionDate() == null) {
             transaction.setTransactionDate(LocalDateTime.now());
         }
 
+        // Save the transaction to the database
         return transactionRepository.save(transaction);
     }
 
