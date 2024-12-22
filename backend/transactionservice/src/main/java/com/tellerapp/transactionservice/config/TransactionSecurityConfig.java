@@ -1,5 +1,5 @@
-// In SecurityConfig (Account Service)
-package tellerapp.accountservice.config;
+// In TransactionSecurityConfig
+package com.tellerapp.transactionservice.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,12 +7,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-public class SecurityConfig {
+public class TransactionSecurityConfig {
 
-    @Bean(name = "accountServiceSecurityFilterChain")
+    @Bean(name = "transactionServiceSecurityFilterChain")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/account/**")  // Apply this filter only to /account/** paths
+                .securityMatcher("/transaction/**")  // Apply this filter only to /transaction/** paths
                 .csrf().disable() // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // Allow all requests within this scope without authentication

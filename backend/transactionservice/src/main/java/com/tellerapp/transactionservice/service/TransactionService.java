@@ -12,6 +12,7 @@ import java.util.List;
 
 @Service
 public class TransactionService {
+
     private final AccountService accountService;
     private final TransactionRepository transactionRepository;
 
@@ -23,18 +24,21 @@ public class TransactionService {
 
     @Transactional
     public Transaction createTransaction(Transaction transaction) {
-        // Handle "Withdrawal"
-        if ("Withdrawal".equalsIgnoreCase(transaction.getTransactionType())) {
-            Account account = accountService.getAccountById(transaction.getAccountId());
+        Account account = accountService.getAccountById(transaction.getAccountId());
 
-            // Authorization check
+        // Set the account number for the transaction from the Account entity
+        transaction.setAccountNumber(account.getAccountNumber());
+
+        // Handle "Withdrawal"
+        if ("WITHDRAWAL".equalsIgnoreCase(transaction.getTransactionType())) {
+            // Authorization check for withdrawals over $1000
             if (transaction.getAmount() > 1000 && transaction.getApprovedBy() == null) {
-                throw new RuntimeException("Withdrawals over $1000 require authorization.");
+                throw new IllegalArgumentException("Withdrawals over $1000 require authorization.");
             }
 
             // Insufficient balance check
             if (account.getBalance() < transaction.getAmount()) {
-                throw new RuntimeException("Insufficient balance.");
+                throw new IllegalArgumentException("Insufficient balance.");
             }
 
             // Deduct balance and update account
@@ -43,16 +47,17 @@ public class TransactionService {
         }
 
         // Handle "Deposit"
-        else if ("Deposit".equalsIgnoreCase(transaction.getTransactionType())) {
-            Account account = accountService.getAccountById(transaction.getAccountId());
-
+        else if ("DEPOSIT".equalsIgnoreCase(transaction.getTransactionType())) {
             // Add balance and update account
             account.setBalance(account.getBalance() + transaction.getAmount());
             accountService.updateAccount(account.getId(), account);
         }
 
-        // Set transaction date and save
-        transaction.setTransactionDate(LocalDateTime.now());
+        // Set transaction date (if not already set) and save the transaction
+        if (transaction.getTransactionDate() == null) {
+            transaction.setTransactionDate(LocalDateTime.now());
+        }
+
         return transactionRepository.save(transaction);
     }
 
