@@ -10,7 +10,7 @@ Personas
 - Authorizer
 Integrate with -> IAM
 ===================
-UI (Angular) (CRUD)
+UI (React) (CRUD)
 ===================
 - Create Customer 
 - Create Accounts 
