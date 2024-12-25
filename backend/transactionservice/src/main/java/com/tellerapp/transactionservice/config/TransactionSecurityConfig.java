@@ -12,7 +12,7 @@ public class TransactionSecurityConfig {
     @Bean(name = "transactionServiceSecurityFilterChain")
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/transaction/**")  // Apply this filter only to /transaction/** paths
+                .securityMatcher("/api/transactions/**")  // Apply this filter only to /transaction/** paths
                 .csrf().disable() // Disable CSRF protection
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll() // Allow all requests within this scope without authentication

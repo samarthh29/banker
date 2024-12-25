@@ -19,9 +19,15 @@ public class TransactionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('Maker','Checker', 'Authorizer')")
+    @PreAuthorize("hasAnyRole('Maker', 'Checker', 'Authorizer')")
     public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
         return ResponseEntity.ok(transactionService.createTransaction(transaction));
+    }
+
+    @PostMapping("/highvalue")
+    @PreAuthorize("hasRole('Authorizer')")
+    public ResponseEntity<Transaction> approveHighValueTransaction(@RequestBody Transaction transaction) {
+        return ResponseEntity.ok(transactionService.approveHighValueTransaction(transaction));
     }
 
     @GetMapping("/account/{accountNumber}")
@@ -40,17 +46,5 @@ public class TransactionController {
     @PreAuthorize("hasAnyRole('Checker', 'Authorizer')")
     public ResponseEntity<List<Transaction>> getAllTransactions() {
         return ResponseEntity.ok(transactionService.getAllTransactions());
-    }
-
-    @PostMapping("/withdraw")
-    @PreAuthorize("hasAnyRole('Maker', 'Checker', 'Authorizer')")
-    public ResponseEntity<Transaction> withdrawTransaction(@RequestBody Transaction transaction) {
-        return ResponseEntity.ok(transactionService.createTransaction(transaction));
-    }
-
-    @PostMapping("/deposit")
-    @PreAuthorize("hasAnyRole('Maker', 'Checker', 'Authorizer')")
-    public ResponseEntity<Transaction> depositTransaction(@RequestBody Transaction transaction) {
-        return ResponseEntity.ok(transactionService.createTransaction(transaction));
     }
 }

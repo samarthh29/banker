@@ -24,7 +24,7 @@ public class TransactionService {
 
     @Transactional
     public Transaction createTransaction(Transaction transaction) {
-        // Get account using account number instead of account ID
+        // Fetch the account by account number
         Account account = accountService.getAccountByAccountNumber(transaction.getAccountNumber());
 
         // If account is not found, throw an exception
@@ -32,14 +32,14 @@ public class TransactionService {
             throw new IllegalArgumentException("Account not found for the given account number.");
         }
 
-        // Set accountId in the transaction (important for database consistency)
+        // Set accountId in the transaction to maintain database consistency
         transaction.setAccountId(account.getId());
 
-        // Handle "Withdrawal"
+        // Handle Withdrawal
         if ("WITHDRAWAL".equalsIgnoreCase(transaction.getTransactionType())) {
-            // Authorization check for withdrawals over $1000
-            if (transaction.getAmount() > 1000 && transaction.getApprovedBy() == null) {
-                throw new IllegalArgumentException("Withdrawals over $1000 require authorization.");
+            // Withdrawals > $1000 must go through the high-value approval endpoint
+            if (transaction.getAmount() > 1000) {
+                throw new IllegalArgumentException("Withdrawals over $1000 require Authorizer approval.");
             }
 
             // Insufficient balance check
@@ -52,17 +52,53 @@ public class TransactionService {
             accountService.updateBalance(account.getAccountNumber(), newBalance);
         }
 
-        // Handle "Deposit"
+        // Handle Deposit
         else if ("DEPOSIT".equalsIgnoreCase(transaction.getTransactionType())) {
-            // Authorization check for deposits over $1000
-            if (transaction.getAmount() > 1000 && transaction.getApprovedBy() == null) {
-                throw new IllegalArgumentException("Deposits over $1000 require authorization.");
-            }
-
             // Add balance and update account
             double newBalance = account.getBalance() + transaction.getAmount();
             accountService.updateBalance(account.getAccountNumber(), newBalance);
         }
+
+        // Set transaction date (if not already set)
+        if (transaction.getTransactionDate() == null) {
+            transaction.setTransactionDate(LocalDateTime.now());
+        }
+
+        // Save the transaction to the database
+        return transactionRepository.save(transaction);
+    }
+
+    @Transactional
+    public Transaction approveHighValueTransaction(Transaction transaction) {
+        // Fetch the account by account number
+        Account account = accountService.getAccountByAccountNumber(transaction.getAccountNumber());
+
+        // If account is not found, throw an exception
+        if (account == null) {
+            throw new IllegalArgumentException("Account not found for the given account number.");
+        }
+
+        // Validate transaction type
+        if (!"WITHDRAWAL".equalsIgnoreCase(transaction.getTransactionType())) {
+            throw new IllegalArgumentException("Only withdrawals can be approved as high-value transactions.");
+        }
+
+        // Validate transaction amount
+        if (transaction.getAmount() <= 1000) {
+            throw new IllegalArgumentException("This transaction does not qualify as a high-value transaction.");
+        }
+
+        // Check for sufficient balance
+        if (account.getBalance() < transaction.getAmount()) {
+            throw new IllegalArgumentException("Insufficient balance.");
+        }
+
+        // Set accountId in the transaction
+        transaction.setAccountId(account.getId());
+
+        // Deduct balance and update account
+        double newBalance = account.getBalance() - transaction.getAmount();
+        accountService.updateBalance(account.getAccountNumber(), newBalance);
 
         // Set transaction date (if not already set)
         if (transaction.getTransactionDate() == null) {
