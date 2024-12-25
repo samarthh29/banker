@@ -3,6 +3,7 @@ package com.tellerapp.transactionservice.controller;
 import com.tellerapp.transactionservice.entity.Transaction;
 import com.tellerapp.transactionservice.service.TransactionService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,22 +19,38 @@ public class TransactionController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('Maker','Checker', 'Authorizer')")
     public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
         return ResponseEntity.ok(transactionService.createTransaction(transaction));
     }
 
     @GetMapping("/account/{accountNumber}")
+    @PreAuthorize("hasAnyRole('Checker', 'Authorizer')")
     public ResponseEntity<List<Transaction>> getTransactionsByAccountNumber(@PathVariable String accountNumber) {
         return ResponseEntity.ok(transactionService.getTransactionsByAccountNumber(accountNumber));
     }
 
     @GetMapping("/customer/{customerId}")
+    @PreAuthorize("hasAnyRole('Checker', 'Authorizer')")
     public ResponseEntity<List<Transaction>> getTransactionsByCustomerId(@PathVariable Long customerId) {
         return ResponseEntity.ok(transactionService.getTransactionsByCustomerId(customerId));
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('Checker', 'Authorizer')")
     public ResponseEntity<List<Transaction>> getAllTransactions() {
         return ResponseEntity.ok(transactionService.getAllTransactions());
+    }
+
+    @PostMapping("/withdraw")
+    @PreAuthorize("hasAnyRole('Maker', 'Checker', 'Authorizer')")
+    public ResponseEntity<Transaction> withdrawTransaction(@RequestBody Transaction transaction) {
+        return ResponseEntity.ok(transactionService.createTransaction(transaction));
+    }
+
+    @PostMapping("/deposit")
+    @PreAuthorize("hasAnyRole('Maker', 'Checker', 'Authorizer')")
+    public ResponseEntity<Transaction> depositTransaction(@RequestBody Transaction transaction) {
+        return ResponseEntity.ok(transactionService.createTransaction(transaction));
     }
 }

@@ -54,6 +54,11 @@ public class TransactionService {
 
         // Handle "Deposit"
         else if ("DEPOSIT".equalsIgnoreCase(transaction.getTransactionType())) {
+            // Authorization check for deposits over $1000
+            if (transaction.getAmount() > 1000 && transaction.getApprovedBy() == null) {
+                throw new IllegalArgumentException("Deposits over $1000 require authorization.");
+            }
+
             // Add balance and update account
             double newBalance = account.getBalance() + transaction.getAmount();
             accountService.updateBalance(account.getAccountNumber(), newBalance);
