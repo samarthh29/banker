@@ -27,14 +27,23 @@ public class GatewaySecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchanges -> exchanges
-                        .matchers(ServerWebExchangeMatchers.pathMatchers("/api/transactions/withdraw/**"))
+                        // Strictly allow only Authorizer role for /api/transactions/highvalue
+                        .matchers(ServerWebExchangeMatchers.pathMatchers("/api/transactions/highvalue"))
+                        .hasRole("Authorizer")
+
+                        // Allow Checker and Authorizer roles for all other /api/transactions/** routes
+                        .matchers(ServerWebExchangeMatchers.pathMatchers("/api/transactions/**"))
                         .hasAnyRole("Checker", "Authorizer")
-                        .matchers(ServerWebExchangeMatchers.pathMatchers("/api/transactions/deposit/**"))
-                        .hasAnyRole("Maker", "Checker", "Authorizer")
+
+                        // Allow Checker and Authorizer roles for /api/accounts/** routes
                         .matchers(ServerWebExchangeMatchers.pathMatchers("/api/accounts/**"))
-                        .hasAnyRole("Maker", "Checker", "Authorizer")
+                        .hasAnyRole("Checker", "Authorizer")
+
+                        // Allow Maker, Checker, and Authorizer roles for /api/customers/** routes
                         .matchers(ServerWebExchangeMatchers.pathMatchers("/api/customers/**"))
-                        .hasAnyRole("Maker", "Checker", "Authorizer")
+                        .hasAnyRole("Maker", "Checker")
+
+                        // Require authentication for all other routes
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
